@@ -207,6 +207,8 @@ public class AgentDaniel extends Agent {
 				} else {
 					break;
 				}
+			default:
+				break;
 			}
 		}
 	}
@@ -341,10 +343,14 @@ public class AgentDaniel extends Agent {
 				} else {
 					break;
 				}
+			default:
+				break;
 			}
 		}
 	}
 	
+	// Verarbeitet die Informationen zur letzten Aktion und passt die Annahmen des Agenten an
+	// TODO: eigentliche Evaluation
 	private void evaluateLastAction() {
 		switch (lastAction) {
 		case "skip":
@@ -436,6 +442,8 @@ public class AgentDaniel extends Agent {
 				break;
 			case "failed":
 				break;
+			default:
+				break;
 			}
 			break;
 		case "detach":
@@ -462,6 +470,8 @@ public class AgentDaniel extends Agent {
 						pos = new Position(this.currentPos.getX()-1, this.currentPos.getY());
 						this.attachedBlocks.remove(pos);
 						break;
+					default:
+						break;
 					}
 			}
 			break;
@@ -487,22 +497,119 @@ public class AgentDaniel extends Agent {
 					}
 					this.attachedBlocks = temp;
 				}
+			case "failed_parameter":
+				// Fehlerbehandlung
+				break;
+			case "failed":
+				// Fehlerbehandlung
+				break;
+			default:
+				break;
 			}
 			break;
 		case "connect":
+			switch (lastActionResult) {
+			case "success":
+				// Behandlung
+				break;
+			case "failed_parameter":
+				// FEhlerbehandlung
+				break;
+			case "failed_partner":
+				// Fehlerbehandlung
+				break;
+			case "failed_target":
+				// Fehlerbehandlung
+				break;
+			case "failed":
+				// Fehlerbehandlung
+				break;
+			default:
+				break;
+			}
 			break;
 		case "disconnect":
+			switch (lastActionResult) {
+			case "success":
+				Parameter xCellA = this.lastActionParameters.get(0);
+				Parameter yCellA = this.lastActionParameters.get(1);
+				Parameter xCellB = this.lastActionParameters.get(2);
+				Parameter yCellB = this.lastActionParameters.get(3);
+				// Bestimmung, ob Blöcke aus der attached-Liste entfernt werden müssen
+				break;
+			case "failed_parameter":
+				// Fehlerbehandlung
+				break;
+			case "failed_target":
+				// Fehlerbehandlung
+				break;
+			default:
+				break;
+			}
 			break;
 		case "request":
 			break;
 		case "submit":
 			break;
 		case "clear":
+			switch (lastActionResult) {
+			case "success":
+				int xCoor = 0;
+				int yCoor = 0;
+				Parameter xCell = this.lastActionParameters.get(0);
+				if (xCell instanceof Numeral) {
+					xCoor = ((Numeral) xCell).getValue().intValue();
+				} else {
+					break;
+				}
+				Parameter yCell = this.lastActionParameters.get(1);
+				if (yCell instanceof Numeral) {
+					yCoor = ((Numeral) yCell).getValue().intValue();
+				} else {
+					break;
+				}
+				this.map.remove(new Position(xCoor, yCoor));
+				break;
+			case "failed_parameter":
+				// Fehlerbehandlung
+				break;
+			case "failed_target":
+				// Fehlerbehandlung
+				break;
+			case "failed_resources":
+				// Fehlerbehandlung
+				break;
+			case "failed_location":
+				// Fehlerbehandlung
+				break;
+			case "failed_random":
+				// Fehlerbehandlung
+				break;
+			default:
+				break;
+			}
 			break;
 		case "adopt":
+			switch (lastActionResult) {
+			case "success":
+				Parameter role = this.lastActionParameters.get(0);
+				if (role instanceof Identifier) {
+					this.role = ((Identifier) role).getValue();
+				}
+			case "failed_parameter":
+				// Fehlerbehandlung
+				break;
+			case "failed_location":
+				// Fehlerbehandlung
+				break;
+			default:
+				break;
+			}
 			break;
 		case "survey":
-		
+			break;
+		default:
+			break;
 		}
 		
 	}
