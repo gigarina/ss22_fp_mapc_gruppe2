@@ -16,6 +16,7 @@ import eis.iilang.ParameterList;
 import eis.iilang.Percept;
 import massim.javaagents.ExtendedMailService;
 import massim.javaagents.MailService;
+import massim.javaagents.Orientation;
 import massim.javaagents.world.Block;
 import massim.javaagents.world.Cell;
 import massim.javaagents.world.Dispenser;
@@ -40,7 +41,8 @@ public class AgentDaniel extends Agent {
 	private long clearChance;
 	private int clearMaxDistance;
 	
-	private Position currentPos;
+	private Position currentPos = new Position(0,0);
+	private Orientation rotated = Orientation.NORTH;
 	private String lastAction;
 	private String lastActionResult;
 	private ArrayList<Parameter> lastActionParameters;
@@ -356,19 +358,14 @@ public class AgentDaniel extends Agent {
 						int x = this.currentPos.getX();
 						int y = this.currentPos.getY();
 						String dirString = ((Identifier) dir).getValue();
-						switch (dirString) {
-						case "n":
-							this.setCurrentPosition(new Position(x-1, y));
-							break;
-						case "s":
-							this.setCurrentPosition(new Position(x+1, y));
-							break;
-						case "e":
+						if ((dirString.equals("n") && this.rotated.equals(Orientation.NORTH)) || (dirString.equals("e") && this.rotated.equals(Orientation.EAST)) || (dirString.equals("s") && this.rotated.equals(Orientation.SOUTH)) || (dirString.equals("w") && this.rotated.equals(Orientation.WEST))) {
 							this.setCurrentPosition(new Position(x, y+1));
-							break;
-						case "w":
-							this.setCurrentPosition(new Position(x, y-1));
-							break;
+						} else if  ((dirString.equals("s") && this.rotated.equals(Orientation.NORTH)) || (dirString.equals("w") && this.rotated.equals(Orientation.EAST)) || (dirString.equals("s") && this.rotated.equals(Orientation.NORTH)) || (dirString.equals("e") && this.rotated.equals(Orientation.WEST))) {
+							this.setCurrentPosition(new Position(x, y+1));
+						} else if ((dirString.equals("e") && this.rotated.equals(Orientation.NORTH)) || (dirString.equals("s") && this.rotated.equals(Orientation.EAST)) || (dirString.equals("w") && this.rotated.equals(Orientation.SOUTH)) || (dirString.equals("n") && this.rotated.equals(Orientation.WEST))) {
+							this.setCurrentPosition(new Position(x+1, y));
+						} else if ((dirString.equals("w") && this.rotated.equals(Orientation.NORTH)) || (dirString.equals("n") && this.rotated.equals(Orientation.EAST)) || (dirString.equals("e") && this.rotated.equals(Orientation.SOUTH)) || (dirString.equals("s") && this.rotated.equals(Orientation.WEST))) {
+							this.setCurrentPosition(new Position(x-1, y));
 						}
 					}
 				}
@@ -380,10 +377,10 @@ public class AgentDaniel extends Agent {
 					String dirString = ((Identifier) dir).getValue();
 					switch (dirString) {
 					case "n":
-						this.setCurrentPosition(new Position(x, y-1));
+						this.setCurrentPosition(new Position(x, y+1));
 						break;
 					case "s":
-						this.setCurrentPosition(new Position(x, y+1));
+						this.setCurrentPosition(new Position(x, y-1));
 						break;
 					case "e":
 						this.setCurrentPosition(new Position(x+1, y));
@@ -410,12 +407,12 @@ public class AgentDaniel extends Agent {
 					Cell cell;
 					switch (dirString) {
 					case "n":
-						pos = new Position(this.currentPos.getX(), this.currentPos.getY()-1);
+						pos = new Position(this.currentPos.getX(), this.currentPos.getY()+1);
 						cell = this.map.get(pos);
 						this.attachedBlocks.put(pos, cell);
 						break;
 					case "s":
-						pos = new Position(this.currentPos.getX(), this.currentPos.getY()+1);
+						pos = new Position(this.currentPos.getX(), this.currentPos.getY()-1);
 						cell = this.map.get(pos);
 						this.attachedBlocks.put(pos, cell);
 						break;
@@ -450,11 +447,11 @@ public class AgentDaniel extends Agent {
 					Position pos;
 					switch (dirString) {
 					case "n":
-						pos = new Position(this.currentPos.getX(), this.currentPos.getY()-1);
+						pos = new Position(this.currentPos.getX(), this.currentPos.getY()+1);
 						this.attachedBlocks.remove(pos);
 						break;
 					case "s":
-						pos = new Position(this.currentPos.getX(), this.currentPos.getY()+1);
+						pos = new Position(this.currentPos.getX(), this.currentPos.getY()-1);
 						this.attachedBlocks.remove(pos);
 						break;
 					case "e":
@@ -474,12 +471,21 @@ public class AgentDaniel extends Agent {
 				Parameter rot = this.lastActionParameters.get(0);
 				if (rot instanceof Identifier) {
 					String rotString = ((Identifier) rot).getValue();
+					HashMap<Position, Cell> temp = new HashMap<Position, Cell>();
 					if (rotString.equals("cw")) {
-						HashMap<Position, Cell> temp = new HashMap<Position, Cell>();
-						
+						this.rotated = Orientation.changeOrientation(rotated, 1);
+						for (Position key : this.attachedBlocks.keySet()) {
+							Cell cell = this.attachedBlocks.get(key);
+							temp.put(new Position(key.getY(), -key.getX()), cell);
+						}
 					} else {
-						
+						this.rotated = Orientation.changeOrientation(rotated, -1);
+						for (Position key : this.attachedBlocks.keySet()) {
+							Cell cell = this.attachedBlocks.get(key);
+							temp.put(new Position(-key.getY(), key.getX()), cell);
+						}
 					}
+					this.attachedBlocks = temp;
 				}
 			}
 			break;
